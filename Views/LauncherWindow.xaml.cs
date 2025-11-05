@@ -113,11 +113,6 @@ namespace MinimalistDesktop.Views
 
         private void Window_PreviewMouseDown(object sender, MouseButtonEventArgs e)
         {
-            if (!_viewModel.ShowAllApps)
-            {
-                return;
-            }
-
             if (e.ChangedButton != MouseButton.Left)
             {
                 return;
@@ -125,16 +120,22 @@ namespace MinimalistDesktop.Views
 
             if (e.OriginalSource is not DependencyObject source)
             {
-                _viewModel.ShowAllApps = false;
                 return;
             }
 
             if (IsInsideInteractiveElements(source))
             {
-                return;
+                // Клик внутри SearchBox или AppListBox - разворачиваем список
+                EnsureAllAppsShown();
             }
-
-            _viewModel.ShowAllApps = false;
+            else
+            {
+                // Клик вне интерактивных элементов - сворачиваем список
+                if (_viewModel.ShowAllApps)
+                {
+                    _viewModel.ShowAllApps = false;
+                }
+            }
         }
 
         private bool IsInsideInteractiveElements(DependencyObject source)
