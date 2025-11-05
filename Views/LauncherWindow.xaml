@@ -131,7 +131,8 @@
                          HorizontalAlignment="Center"
                          Width="600"
                          MaxHeight="300"
-                         Margin="0,0,0,20">
+                         Margin="0,0,0,20"
+                         MouseDoubleClick="AppListBox_MouseDoubleClick">
                     <ListBox.ItemTemplate>
                         <DataTemplate>
                             <StackPanel Orientation="Horizontal">

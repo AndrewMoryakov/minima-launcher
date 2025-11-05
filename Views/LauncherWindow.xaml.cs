@@ -300,6 +300,15 @@ namespace MinimalistDesktop.Views
             }
         }
 
+        private void AppListBox_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            if (_viewModel.SelectedApp != null)
+            {
+                _viewModel.LaunchSelectedApp();
+                e.Handled = true;
+            }
+        }
+
         private void OnCloseRequested(object sender, EventArgs e)
         {
             HideWindow();
