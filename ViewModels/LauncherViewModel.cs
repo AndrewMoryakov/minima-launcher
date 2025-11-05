@@ -7,13 +7,14 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Threading;
+using MinimalistDesktop.Constants;
 using MinimalistDesktop.Models;
 using MinimalistDesktop.Services;
 using MinimalistDesktop.Utilities;
 
 namespace MinimalistDesktop.ViewModels
 {
-    public class LauncherViewModel : INotifyPropertyChanged
+    public class LauncherViewModel : INotifyPropertyChanged, IDisposable
     {
         private readonly LaunchService _launchService;
         private readonly SettingsService _settingsService;
@@ -70,13 +71,26 @@ namespace MinimalistDesktop.ViewModels
             // Загружаем асинхронно в фоне
             System.Threading.Tasks.Task.Run(() =>
             {
-                var discoveredApps = _discoveryService.DiscoverApplications();
-
-                // Возвращаемся в UI поток
-                Application.Current.Dispatcher.Invoke(() =>
+                try
                 {
-                    AllApps = new ObservableCollection<AppShortcut>(discoveredApps);
-                });
+                    var discoveredApps = _discoveryService.DiscoverApplications();
+
+                    // Возвращаемся в UI поток
+                    Application.Current.Dispatcher.Invoke(() =>
+                    {
+                        AllApps = new ObservableCollection<AppShortcut>(discoveredApps);
+                    });
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"Error loading applications: {ex.Message}");
+
+                    // В случае ошибки устанавливаем пустую коллекцию
+                    Application.Current.Dispatcher.Invoke(() =>
+                    {
+                        AllApps = new ObservableCollection<AppShortcut>();
+                    });
+                }
             });
         }
 
@@ -183,8 +197,8 @@ namespace MinimalistDesktop.ViewModels
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Ошибка запуска приложения:\n{ex.Message}", 
-                    "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(string.Format(UIConstants.LaunchErrorTemplate, ex.Message),
+                    UIConstants.ErrorTitle, MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -212,8 +226,8 @@ namespace MinimalistDesktop.ViewModels
             if (SelectedApp == null) return;
 
             var result = MessageBox.Show(
-                $"Удалить '{SelectedApp.Name}' из списка?",
-                "Подтверждение",
+                string.Format(UIConstants.RemoveAppConfirmationTemplate, SelectedApp.Name),
+                UIConstants.ConfirmationTitle,
                 MessageBoxButton.YesNo,
                 MessageBoxImage.Question);
 
@@ -321,6 +335,11 @@ namespace MinimalistDesktop.ViewModels
         protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+
+        public void Dispose()
+        {
+            _timeTimer?.Stop();
         }
 
         #endregion

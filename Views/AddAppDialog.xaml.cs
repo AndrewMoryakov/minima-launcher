@@ -1,5 +1,6 @@
 using System.Windows;
 using Microsoft.Win32;
+using MinimalistDesktop.Constants;
 
 namespace MinimalistDesktop.Views
 {
@@ -19,8 +20,8 @@ namespace MinimalistDesktop.Views
         {
             var openFileDialog = new OpenFileDialog
             {
-                Filter = "Исполняемые файлы (*.exe)|*.exe|Все файлы (*.*)|*.*",
-                Title = "Выберите приложение"
+                Filter = UIConstants.ExecutableFilesFilter,
+                Title = UIConstants.SelectApplication
             };
 
             if (openFileDialog.ShowDialog() == true)
@@ -39,7 +40,7 @@ namespace MinimalistDesktop.Views
         {
             if (string.IsNullOrWhiteSpace(AppName))
             {
-                MessageBox.Show("Введите название приложения", "Ошибка", 
+                MessageBox.Show(UIConstants.EnterAppName, UIConstants.ErrorTitle,
                     MessageBoxButton.OK, MessageBoxImage.Warning);
                 NameTextBox.Focus();
                 return;
@@ -47,14 +48,51 @@ namespace MinimalistDesktop.Views
 
             if (string.IsNullOrWhiteSpace(AppPath))
             {
-                MessageBox.Show("Введите путь к приложению", "Ошибка", 
+                MessageBox.Show(UIConstants.EnterAppPath, UIConstants.ErrorTitle,
                     MessageBoxButton.OK, MessageBoxImage.Warning);
                 PathTextBox.Focus();
                 return;
             }
 
+            // Валидация пути к файлу
+            var expandedPath = System.Environment.ExpandEnvironmentVariables(AppPath);
+
+            // Проверяем только для обычных файлов (не URL и не команды)
+            if (!AppPath.StartsWith("http://") &&
+                !AppPath.StartsWith("https://") &&
+                !IsSystemCommand(AppPath))
+            {
+                if (!System.IO.File.Exists(expandedPath))
+                {
+                    var result = MessageBox.Show(
+                        string.Format(UIConstants.FileNotFoundTemplate, expandedPath),
+                        UIConstants.WarningTitle,
+                        MessageBoxButton.YesNo,
+                        MessageBoxImage.Warning);
+
+                    if (result != MessageBoxResult.Yes)
+                    {
+                        PathTextBox.Focus();
+                        return;
+                    }
+                }
+            }
+
             DialogResult = true;
             Close();
+        }
+
+        private bool IsSystemCommand(string path)
+        {
+            // Проверяем, является ли команда системной
+            var fileName = System.IO.Path.GetFileName(path).ToLowerInvariant();
+            var systemCommands = new[]
+            {
+                "notepad.exe", "calc.exe", "mspaint.exe", "explorer.exe",
+                "cmd.exe", "powershell.exe", "control.exe", "taskmgr.exe"
+            };
+
+            return System.Array.Exists(systemCommands, cmd => cmd == fileName);
         }
 
         private void CancelButton_Click(object sender, RoutedEventArgs e)

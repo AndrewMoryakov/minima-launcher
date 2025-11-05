@@ -36,12 +36,12 @@ namespace MinimalistDesktop.Models
         /// <summary>
         /// Тип пути: SpecialFolder или Custom
         /// </summary>
-        public string Type { get; set; }
+        public string Type { get; set; } = string.Empty;
 
         /// <summary>
         /// Значение (имя SpecialFolder или путь)
         /// </summary>
-        public string Value { get; set; }
+        public string Value { get; set; } = string.Empty;
     }
 
     /// <summary>
@@ -52,17 +52,17 @@ namespace MinimalistDesktop.Models
         /// <summary>
         /// Отображаемое имя
         /// </summary>
-        public string Name { get; set; }
+        public string Name { get; set; } = string.Empty;
 
         /// <summary>
         /// Команда запуска
         /// </summary>
-        public string Command { get; set; }
+        public string Command { get; set; } = string.Empty;
 
         /// <summary>
         /// Тип приложения
         /// </summary>
-        public string Type { get; set; }
+        public string Type { get; set; } = string.Empty;
     }
 
     /// <summary>
@@ -73,22 +73,22 @@ namespace MinimalistDesktop.Models
         /// <summary>
         /// Отображаемое имя
         /// </summary>
-        public string Name { get; set; }
+        public string Name { get; set; } = string.Empty;
 
         /// <summary>
         /// Путь к исполняемому файлу
         /// </summary>
-        public string Path { get; set; }
+        public string Path { get; set; } = string.Empty;
 
         /// <summary>
         /// Аргументы командной строки
         /// </summary>
-        public string Arguments { get; set; }
+        public string? Arguments { get; set; }
 
         /// <summary>
         /// Тип приложения
         /// </summary>
-        public string Type { get; set; }
+        public string Type { get; set; } = string.Empty;
 
         /// <summary>
         /// Порядок отображения

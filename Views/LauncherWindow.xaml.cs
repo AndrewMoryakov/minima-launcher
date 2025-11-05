@@ -6,6 +6,7 @@ using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
+using MinimalistDesktop.Constants;
 using MinimalistDesktop.Native;
 using MinimalistDesktop.Services;
 using MinimalistDesktop.ViewModels;
@@ -356,8 +357,8 @@ namespace MinimalistDesktop.Views
             catch (Exception ex)
             {
                 MessageBox.Show(
-                    $"Ошибка при восстановлении рабочего стола:\n{ex.Message}",
-                    "Ошибка",
+                    string.Format(UIConstants.RestoreDesktopErrorTemplate, ex.Message),
+                    UIConstants.ErrorTitle,
                     MessageBoxButton.OK,
                     MessageBoxImage.Error);
             }

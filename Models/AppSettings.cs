@@ -30,7 +30,7 @@ namespace MinimalistDesktop.Models
         /// <summary>
         /// Фоновое изображение
         /// </summary>
-        public string BackgroundImage { get; set; }
+        public string? BackgroundImage { get; set; }
 
         /// <summary>
         /// Цвет фона
