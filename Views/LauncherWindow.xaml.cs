@@ -69,7 +69,7 @@ namespace MinimalistDesktop.Views
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             SearchBox.GotFocus += SearchBox_GotFocus;
-            SearchBox.PreviewMouseLeftButtonDown += SearchBox_PreviewMouseLeftButtonDown;
+            // SearchBox_PreviewMouseLeftButtonDown удален - логика клика теперь в Window_PreviewMouseDown
 
             AppListBox.MaxHeight = CollapsedListMaxHeight;
             // Ignore programmatic focus so expansion reacts to user input.
@@ -91,11 +91,6 @@ namespace MinimalistDesktop.Views
                 return;
             }
 
-            EnsureAllAppsShown();
-        }
-
-        private void SearchBox_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
-        {
             EnsureAllAppsShown();
         }
 
@@ -212,15 +207,24 @@ namespace MinimalistDesktop.Views
 
         private void UpdateExpandedListTarget()
         {
-            var containerHeight = AppListContainer.ActualHeight;
-            if (containerHeight <= 0)
+            var windowHeight = this.ActualHeight;
+
+            if (windowHeight <= 0)
             {
                 return;
             }
 
+            // Toolbar находится поверх, вычитаем его высоту + отступы
             var toolbarHeight = ToolbarPanel?.ActualHeight ?? 0;
             var toolbarTopOffset = ToolbarPanel?.Margin.Top ?? 0;
-            var availableHeight = containerHeight - (toolbarHeight + toolbarTopOffset);
+            var toolbarBottomMargin = 20; // Отступ снизу от toolbar
+
+            // Вычитаем все фиксированные элементы внизу
+            // Примерные высоты: SearchBox (~70), TimeDisplay (~80), Hints (~50), margins (~70)
+            var fixedBottomHeight = 270; // Сумма всех элементов внизу
+
+            var availableHeight = windowHeight - fixedBottomHeight - (toolbarHeight + toolbarTopOffset + toolbarBottomMargin);
+
             if (availableHeight < CollapsedListMaxHeight)
             {
                 availableHeight = CollapsedListMaxHeight;
