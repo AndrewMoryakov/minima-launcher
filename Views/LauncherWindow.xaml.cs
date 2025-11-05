@@ -307,8 +307,8 @@ namespace MinimalistDesktop.Views
 
         private void OnAppLaunched(object sender, EventArgs e)
         {
-            // Скрываем окно после запуска приложения
-            HideWindow();
+            // Launcher stays open after launching an app
+            // User can close it manually with ESC or by clicking outside
         }
 
         private void HideWindow()
