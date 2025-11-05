@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using MinimalistDesktop.Models;
+using MinimalistDesktop.Utilities;
 
 namespace MinimalistDesktop.Services
 {
@@ -132,15 +133,15 @@ namespace MinimalistDesktop.Services
                                     IsPinned = false
                                 });
                             }
-                            catch
+                            catch (Exception ex)
                             {
-                                // Игнорируем ошибки доступа к файлам
+                                System.Diagnostics.Debug.WriteLine($"Error processing file {exeFile}: {ex.Message}");
                             }
                         }
                     }
-                    catch
+                    catch (Exception ex)
                     {
-                        // Игнорируем ошибки доступа к директориям
+                        System.Diagnostics.Debug.WriteLine($"Error accessing directory {dir}: {ex.Message}");
                     }
                 }
 
@@ -177,20 +178,20 @@ namespace MinimalistDesktop.Services
                                 });
                             }
                         }
-                        catch
+                        catch (Exception ex)
                         {
-                            // Игнорируем ошибки обработки ярлыков
+                            System.Diagnostics.Debug.WriteLine($"Error processing shortcut {lnkFile}: {ex.Message}");
                         }
                     }
                 }
-                catch
+                catch (Exception ex)
                 {
-                    // Игнорируем ошибки поиска .lnk файлов
+                    System.Diagnostics.Debug.WriteLine($"Error searching for .lnk files in {directory}: {ex.Message}");
                 }
             }
-            catch
+            catch (Exception ex)
             {
-                // Игнорируем ошибки доступа
+                System.Diagnostics.Debug.WriteLine($"Error discovering applications in {directory}: {ex.Message}");
             }
 
             return apps;
@@ -198,27 +199,43 @@ namespace MinimalistDesktop.Services
 
         private string GetShortcutTarget(string shortcutPath)
         {
+            object? shell = null;
+            object? shortcut = null;
+
             try
             {
                 // Используем IWshRuntimeLibrary для чтения .lnk файлов
                 // Создаем через позднее связывание, чтобы избежать зависимости от COM reference
-                var shell = Activator.CreateInstance(Type.GetTypeFromProgID("WScript.Shell"));
-                var shortcut = shell.GetType().InvokeMember("CreateShortcut",
+                shell = Activator.CreateInstance(Type.GetTypeFromProgID("WScript.Shell")!);
+                shortcut = shell.GetType().InvokeMember("CreateShortcut",
                     System.Reflection.BindingFlags.InvokeMethod,
                     null, shell, new object[] { shortcutPath });
 
-                var targetPath = shortcut.GetType().InvokeMember("TargetPath",
+                var targetPath = shortcut?.GetType().InvokeMember("TargetPath",
                     System.Reflection.BindingFlags.GetProperty,
                     null, shortcut, null) as string;
 
-                System.Runtime.InteropServices.Marshal.ReleaseComObject(shortcut);
-                System.Runtime.InteropServices.Marshal.ReleaseComObject(shell);
-
                 return targetPath ?? string.Empty;
             }
-            catch
+            catch (Exception ex)
             {
+                System.Diagnostics.Debug.WriteLine($"Error reading shortcut {shortcutPath}: {ex.Message}");
                 return string.Empty;
+            }
+            finally
+            {
+                // Освобождаем COM объекты в любом случае
+                if (shortcut != null)
+                {
+                    try { System.Runtime.InteropServices.Marshal.ReleaseComObject(shortcut); }
+                    catch { /* Ignore disposal errors */ }
+                }
+
+                if (shell != null)
+                {
+                    try { System.Runtime.InteropServices.Marshal.ReleaseComObject(shell); }
+                    catch { /* Ignore disposal errors */ }
+                }
             }
         }
 
@@ -242,22 +259,10 @@ namespace MinimalistDesktop.Services
                     Path = systemApp.Command,
                     Arguments = string.Empty,
                     WorkingDirectory = string.Empty,
-                    Type = ParseLaunchType(systemApp.Type),
+                    Type = LaunchTypeParser.Parse(systemApp.Type),
                     IsPinned = false
                 });
             }
-        }
-
-        private LaunchType ParseLaunchType(string type)
-        {
-            return type switch
-            {
-                "Standard" => LaunchType.Standard,
-                "UWP" => LaunchType.UWP,
-                "Url" => LaunchType.Url,
-                "Command" => LaunchType.Command,
-                _ => LaunchType.Standard
-            };
         }
 
         /// <summary>

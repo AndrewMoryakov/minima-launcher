@@ -264,7 +264,7 @@ namespace MinimalistDesktop.Native
     public class WindowInfo
     {
         public IntPtr Handle { get; set; }
-        public string Title { get; set; }
+        public string Title { get; set; } = string.Empty;
         public bool IsMinimized { get; set; }
     }
 }

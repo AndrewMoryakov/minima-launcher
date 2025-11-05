@@ -14,7 +14,14 @@ namespace MinimalistDesktop.Views
 {
     public partial class LauncherWindow : Window
     {
+        // UI Layout Constants
         private const double CollapsedListMaxHeight = 300;
+        private const double FixedBottomHeight = 270; // SearchBox + TimeDisplay + Hints + margins
+        private const double ToolbarBottomMargin = 20;
+        private const int ExpandAnimationDuration = 400;
+        private const int CollapseAnimationDuration = 300;
+        private const int FadeInDuration = 200;
+        private const int FadeOutDuration = 150;
         private readonly LauncherViewModel _viewModel;
         private readonly ShellModeManager _shellModeManager;
         private bool _suppressSearchFocusHandler;
@@ -79,7 +86,7 @@ namespace MinimalistDesktop.Views
             SetWindowToDesktopLevel();
             UpdateExpandedListTarget();
 
-            var fadeIn = new DoubleAnimation(0, 1, TimeSpan.FromMilliseconds(200));
+            var fadeIn = new DoubleAnimation(0, 1, TimeSpan.FromMilliseconds(FadeInDuration));
             this.BeginAnimation(OpacityProperty, fadeIn);
         }
 
@@ -197,7 +204,7 @@ namespace MinimalistDesktop.Views
             {
                 From = currentHeight,
                 To = targetHeight,
-                Duration = TimeSpan.FromMilliseconds(expanding ? 400 : 300),
+                Duration = TimeSpan.FromMilliseconds(expanding ? ExpandAnimationDuration : CollapseAnimationDuration),
                 EasingFunction = new CubicEase { EasingMode = expanding ? EasingMode.EaseOut : EasingMode.EaseIn }
             };
 
@@ -217,13 +224,8 @@ namespace MinimalistDesktop.Views
             // Toolbar находится поверх, вычитаем его высоту + отступы
             var toolbarHeight = ToolbarPanel?.ActualHeight ?? 0;
             var toolbarTopOffset = ToolbarPanel?.Margin.Top ?? 0;
-            var toolbarBottomMargin = 20; // Отступ снизу от toolbar
 
-            // Вычитаем все фиксированные элементы внизу
-            // Примерные высоты: SearchBox (~70), TimeDisplay (~80), Hints (~50), margins (~70)
-            var fixedBottomHeight = 270; // Сумма всех элементов внизу
-
-            var availableHeight = windowHeight - fixedBottomHeight - (toolbarHeight + toolbarTopOffset + toolbarBottomMargin);
+            var availableHeight = windowHeight - FixedBottomHeight - (toolbarHeight + toolbarTopOffset + ToolbarBottomMargin);
 
             if (availableHeight < CollapsedListMaxHeight)
             {
@@ -322,7 +324,7 @@ namespace MinimalistDesktop.Views
 
         private void HideWindow()
         {
-            var fadeOut = new DoubleAnimation(1, 0, TimeSpan.FromMilliseconds(150));
+            var fadeOut = new DoubleAnimation(1, 0, TimeSpan.FromMilliseconds(FadeOutDuration));
             fadeOut.Completed += (s, e) => this.Hide();
             this.BeginAnimation(OpacityProperty, fadeOut);
         }
@@ -341,7 +343,7 @@ namespace MinimalistDesktop.Views
             SetWindowToDesktopLevel();
             UpdateExpandedListTarget();
 
-            var fadeIn = new DoubleAnimation(0, 1, TimeSpan.FromMilliseconds(200));
+            var fadeIn = new DoubleAnimation(0, 1, TimeSpan.FromMilliseconds(FadeInDuration));
             this.BeginAnimation(OpacityProperty, fadeIn);
         }
 

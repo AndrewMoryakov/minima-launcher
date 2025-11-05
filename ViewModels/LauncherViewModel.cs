@@ -9,6 +9,7 @@ using System.Windows;
 using System.Windows.Threading;
 using MinimalistDesktop.Models;
 using MinimalistDesktop.Services;
+using MinimalistDesktop.Utilities;
 
 namespace MinimalistDesktop.ViewModels
 {
@@ -306,7 +307,7 @@ namespace MinimalistDesktop.ViewModels
                     Path = expandedPath,
                     Arguments = defaultApp.Arguments ?? string.Empty,
                     Order = defaultApp.Order,
-                    Type = ParseLaunchType(defaultApp.Type),
+                    Type = LaunchTypeParser.Parse(defaultApp.Type),
                     IsPinned = true
                 };
 
@@ -315,18 +316,6 @@ namespace MinimalistDesktop.ViewModels
 
             FilteredApps = new ObservableCollection<AppShortcut>(Apps);
             SaveApps();
-        }
-
-        private LaunchType ParseLaunchType(string type)
-        {
-            return type switch
-            {
-                "Standard" => LaunchType.Standard,
-                "UWP" => LaunchType.UWP,
-                "Url" => LaunchType.Url,
-                "Command" => LaunchType.Command,
-                _ => LaunchType.Standard
-            };
         }
 
         protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)

@@ -12,7 +12,8 @@ namespace MinimalistDesktop.Services
     public class ConfigService
     {
         private static readonly string ConfigFileName = "config.yaml";
-        private static AppConfig _cachedConfig;
+        private static AppConfig? _cachedConfig;
+        private static readonly object _lock = new object();
 
         /// <summary>
         /// Загружает конфигурацию из YAML файла
@@ -23,36 +24,43 @@ namespace MinimalistDesktop.Services
             if (_cachedConfig != null)
                 return _cachedConfig;
 
-            try
+            lock (_lock)
             {
-                // Путь к конфигурационному файлу (рядом с exe)
-                var configPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ConfigFileName);
+                // Двойная проверка после получения блокировки
+                if (_cachedConfig != null)
+                    return _cachedConfig;
 
-                if (!File.Exists(configPath))
+                try
                 {
-                    // Если файл не существует, создаем конфигурацию по умолчанию
-                    _cachedConfig = CreateDefaultConfig();
-                    SaveConfig(_cachedConfig, configPath);
+                    // Путь к конфигурационному файлу (рядом с exe)
+                    var configPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ConfigFileName);
+
+                    if (!File.Exists(configPath))
+                    {
+                        // Если файл не существует, создаем конфигурацию по умолчанию
+                        _cachedConfig = CreateDefaultConfig();
+                        SaveConfig(_cachedConfig, configPath);
+                        return _cachedConfig;
+                    }
+
+                    // Читаем YAML файл
+                    var yaml = File.ReadAllText(configPath);
+
+                    // Десериализуем
+                    var deserializer = new DeserializerBuilder()
+                        .WithNamingConvention(CamelCaseNamingConvention.Instance)
+                        .Build();
+
+                    _cachedConfig = deserializer.Deserialize<AppConfig>(yaml);
                     return _cachedConfig;
                 }
-
-                // Читаем YAML файл
-                var yaml = File.ReadAllText(configPath);
-
-                // Десериализуем
-                var deserializer = new DeserializerBuilder()
-                    .WithNamingConvention(CamelCaseNamingConvention.Instance)
-                    .Build();
-
-                _cachedConfig = deserializer.Deserialize<AppConfig>(yaml);
-                return _cachedConfig;
-            }
-            catch (Exception ex)
-            {
-                // В случае ошибки возвращаем конфигурацию по умолчанию
-                System.Diagnostics.Debug.WriteLine($"Ошибка загрузки конфигурации: {ex.Message}");
-                _cachedConfig = CreateDefaultConfig();
-                return _cachedConfig;
+                catch (Exception ex)
+                {
+                    // В случае ошибки возвращаем конфигурацию по умолчанию
+                    System.Diagnostics.Debug.WriteLine($"Ошибка загрузки конфигурации: {ex.Message}");
+                    _cachedConfig = CreateDefaultConfig();
+                    return _cachedConfig;
+                }
             }
         }
 
@@ -121,7 +129,10 @@ namespace MinimalistDesktop.Services
         /// </summary>
         public void ClearCache()
         {
-            _cachedConfig = null;
+            lock (_lock)
+            {
+                _cachedConfig = null;
+            }
         }
     }
 }

@@ -15,22 +15,22 @@ namespace MinimalistDesktop.Models
         /// <summary>
         /// Отображаемое имя приложения
         /// </summary>
-        public string Name { get; set; }
+        public string Name { get; set; } = string.Empty;
 
         /// <summary>
         /// Путь к исполняемому файлу или команде
         /// </summary>
-        public string Path { get; set; }
+        public string Path { get; set; } = string.Empty;
 
         /// <summary>
         /// Аргументы командной строки (опционально)
         /// </summary>
-        public string Arguments { get; set; }
+        public string? Arguments { get; set; }
 
         /// <summary>
         /// Рабочая директория (опционально)
         /// </summary>
-        public string WorkingDirectory { get; set; }
+        public string? WorkingDirectory { get; set; }
 
         /// <summary>
         /// Порядок отображения
