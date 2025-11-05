@@ -19,6 +19,17 @@
         Activated="Window_Activated"
         Deactivated="Window_Deactivated">
 
+    <Window.InputBindings>
+        <!-- Enter - запуск выбранного приложения -->
+        <KeyBinding Key="Enter" Command="{Binding LaunchSelectedAppCommand}" />
+
+        <!-- Ctrl+N - добавить новое приложение -->
+        <KeyBinding Key="N" Modifiers="Control" Command="{Binding AddAppCommand}" />
+
+        <!-- Delete - удалить выбранное приложение -->
+        <KeyBinding Key="Delete" Command="{Binding RemoveSelectedAppCommand}" />
+    </Window.InputBindings>
+
     <Window.Resources>
         <!-- Bool to Visibility Converter -->
         <BooleanToVisibilityConverter x:Key="BoolToVisibilityConverter"/>

@@ -6,10 +6,13 @@ using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Windows;
+using System.Windows.Input;
 using System.Windows.Threading;
 using MinimalistDesktop.Constants;
+using MinimalistDesktop.Infrastructure;
 using MinimalistDesktop.Models;
 using MinimalistDesktop.Services;
+using MinimalistDesktop.Services.Interfaces;
 using MinimalistDesktop.Utilities;
 
 namespace MinimalistDesktop.ViewModels
@@ -20,22 +23,30 @@ namespace MinimalistDesktop.ViewModels
         private readonly SettingsService _settingsService;
         private readonly AppDiscoveryService _discoveryService;
         private readonly ConfigService _configService;
+        private readonly IDialogService _dialogService;
         private readonly DispatcherTimer _timeTimer;
 
         private ObservableCollection<AppShortcut> _apps;
         private ObservableCollection<AppShortcut> _allApps;
         private ObservableCollection<AppShortcut> _filteredApps;
-        private AppShortcut _selectedApp;
+        private AppShortcut? _selectedApp;
         private string _searchQuery;
         private string _currentTime;
         private bool _showAllApps;
 
-        public LauncherViewModel()
+        public LauncherViewModel(IDialogService dialogService)
         {
+            _dialogService = dialogService ?? throw new ArgumentNullException(nameof(dialogService));
             _launchService = new LaunchService();
             _settingsService = new SettingsService();
             _discoveryService = new AppDiscoveryService();
             _configService = new ConfigService();
+
+            // Инициализация команд
+            LaunchSelectedAppCommand = new RelayCommand(ExecuteLaunchSelectedApp, CanExecuteLaunchSelectedApp);
+            AddAppCommand = new RelayCommand(ExecuteAddApp);
+            RemoveSelectedAppCommand = new RelayCommand(ExecuteRemoveSelectedApp, CanExecuteRemoveSelectedApp);
+            CloseCommand = new RelayCommand(ExecuteClose);
 
             // Загружаем закрепленные приложения (сохраненные)
             var savedApps = _settingsService.LoadApps();
@@ -94,6 +105,15 @@ namespace MinimalistDesktop.ViewModels
             });
         }
 
+        #region Commands
+
+        public ICommand LaunchSelectedAppCommand { get; }
+        public ICommand AddAppCommand { get; }
+        public ICommand RemoveSelectedAppCommand { get; }
+        public ICommand CloseCommand { get; }
+
+        #endregion
+
         #region Properties
 
         public ObservableCollection<AppShortcut> Apps
@@ -143,13 +163,15 @@ namespace MinimalistDesktop.ViewModels
             }
         }
 
-        public AppShortcut SelectedApp
+        public AppShortcut? SelectedApp
         {
             get => _selectedApp;
             set
             {
                 _selectedApp = value;
                 OnPropertyChanged();
+                // Обновляем состояние команд, зависящих от выбранного элемента
+                CommandManager.InvalidateRequerySuggested();
             }
         }
 
@@ -178,15 +200,20 @@ namespace MinimalistDesktop.ViewModels
 
         #region Events
 
-        public event EventHandler CloseRequested;
-        public event EventHandler AppLaunched;
-        public event PropertyChangedEventHandler PropertyChanged;
+        public event EventHandler? CloseRequested;
+        public event EventHandler? AppLaunched;
+        public event PropertyChangedEventHandler? PropertyChanged;
 
         #endregion
 
-        #region Methods
+        #region Command Implementations
 
-        public void LaunchSelectedApp()
+        private bool CanExecuteLaunchSelectedApp()
+        {
+            return SelectedApp != null;
+        }
+
+        private void ExecuteLaunchSelectedApp()
         {
             if (SelectedApp == null) return;
 
@@ -197,47 +224,61 @@ namespace MinimalistDesktop.ViewModels
             }
             catch (Exception ex)
             {
-                MessageBox.Show(string.Format(UIConstants.LaunchErrorTemplate, ex.Message),
-                    UIConstants.ErrorTitle, MessageBoxButton.OK, MessageBoxImage.Error);
+                _dialogService.ShowError(
+                    string.Format(UIConstants.LaunchErrorTemplate, ex.Message),
+                    UIConstants.ErrorTitle);
             }
         }
 
-        public void ShowAddAppDialog()
+        private void ExecuteAddApp()
         {
-            var dialog = new Views.AddAppDialog();
-            if (dialog.ShowDialog() == true)
+            var result = _dialogService.ShowAddAppDialog();
+            if (result != null)
             {
                 var newApp = new AppShortcut
                 {
-                    Name = dialog.AppName,
-                    Path = dialog.AppPath,
-                    Arguments = dialog.AppArguments,
-                    Order = Apps.Count
+                    Name = result.Name,
+                    Path = result.Path,
+                    Arguments = result.Arguments,
+                    Order = Apps.Count,
+                    IsPinned = true
                 };
 
                 Apps.Add(newApp);
-                FilteredApps.Add(newApp);
+                FilterApps();
                 SaveApps();
             }
         }
 
-        public void RemoveSelectedApp()
+        private bool CanExecuteRemoveSelectedApp()
+        {
+            return SelectedApp != null;
+        }
+
+        private void ExecuteRemoveSelectedApp()
         {
             if (SelectedApp == null) return;
 
-            var result = MessageBox.Show(
+            var confirmed = _dialogService.ShowConfirmation(
                 string.Format(UIConstants.RemoveAppConfirmationTemplate, SelectedApp.Name),
-                UIConstants.ConfirmationTitle,
-                MessageBoxButton.YesNo,
-                MessageBoxImage.Question);
+                UIConstants.ConfirmationTitle);
 
-            if (result == MessageBoxResult.Yes)
+            if (confirmed)
             {
                 Apps.Remove(SelectedApp);
                 FilterApps();
                 SaveApps();
             }
         }
+
+        private void ExecuteClose()
+        {
+            CloseRequested?.Invoke(this, EventArgs.Empty);
+        }
+
+        #endregion
+
+        #region Methods
 
         private void FilterApps()
         {

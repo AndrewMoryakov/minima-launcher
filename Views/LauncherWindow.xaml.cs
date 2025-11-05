@@ -31,7 +31,10 @@ namespace MinimalistDesktop.Views
         public LauncherWindow()
         {
             InitializeComponent();
-            _viewModel = new LauncherViewModel();
+
+            // Создаем зависимости и ViewModel
+            var dialogService = new DialogService();
+            _viewModel = new LauncherViewModel(dialogService);
             DataContext = _viewModel;
 
             // Инициализация ShellModeManager
@@ -273,41 +276,21 @@ namespace MinimalistDesktop.Views
 
         private void Window_KeyDown(object sender, KeyEventArgs e)
         {
-            switch (e.Key)
+            // Escape обрабатывается напрямую, т.к. это действие окна, а не бизнес-логика
+            if (e.Key == Key.Escape)
             {
-                case Key.Escape:
-                    HideWindow();
-                    e.Handled = true;
-                    break;
-
-                case Key.Enter:
-                    _viewModel.LaunchSelectedApp();
-                    e.Handled = true;
-                    break;
-
-                case Key.N:
-                    if (Keyboard.Modifiers == System.Windows.Input.ModifierKeys.Control)
-                    {
-                        _viewModel.ShowAddAppDialog();
-                        e.Handled = true;
-                    }
-                    break;
-
-                case Key.Delete:
-                    if (_viewModel.SelectedApp != null)
-                    {
-                        _viewModel.RemoveSelectedApp();
-                        e.Handled = true;
-                    }
-                    break;
+                HideWindow();
+                e.Handled = true;
             }
+            // Остальные команды обрабатываются через InputBindings в XAML
         }
 
         private void AppListBox_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
-            if (_viewModel.SelectedApp != null)
+            // Двойной клик - запуск команды
+            if (_viewModel.LaunchSelectedAppCommand.CanExecute(null))
             {
-                _viewModel.LaunchSelectedApp();
+                _viewModel.LaunchSelectedAppCommand.Execute(null);
                 e.Handled = true;
             }
         }
