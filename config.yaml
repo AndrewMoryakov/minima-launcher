@@ -1,0 +1,80 @@
+# Конфигурация MinimalistDesktop
+
+# Источники для поиска программ (массив путей)
+searchPaths:
+  # Системные пути
+  - type: "SpecialFolder"
+    value: "ProgramFiles"
+  - type: "SpecialFolder"
+    value: "ProgramFilesX86"
+  - type: "SpecialFolder"
+    value: "UserStartMenu"
+  - type: "SpecialFolder"
+    value: "CommonStartMenu"
+  # Пользовательские пути (можно добавить свои)
+  # - type: "Custom"
+  #   value: "C:\\MyApps"
+
+# Системные приложения
+systemApps:
+  - name: "Notepad"
+    command: "notepad.exe"
+    type: "Command"
+  - name: "Calculator"
+    command: "calc.exe"
+    type: "Command"
+  - name: "Paint"
+    command: "mspaint.exe"
+    type: "Command"
+  - name: "WordPad"
+    command: "write.exe"
+    type: "Command"
+  - name: "Task Manager"
+    command: "taskmgr.exe"
+    type: "Command"
+  - name: "Command Prompt"
+    command: "cmd.exe"
+    type: "Command"
+  - name: "PowerShell"
+    command: "powershell.exe"
+    type: "Command"
+  - name: "File Explorer"
+    command: "explorer.exe"
+    type: "Command"
+
+# Программы по умолчанию (закрепленные при первом запуске)
+defaultPinnedApps:
+  - name: "Chrome"
+    path: "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe"
+    arguments: ""
+    type: "Standard"
+    order: 0
+  - name: "Visual Studio Code"
+    path: "C:\\Users\\%USERNAME%\\AppData\\Local\\Programs\\Microsoft VS Code\\Code.exe"
+    arguments: ""
+    type: "Standard"
+    order: 1
+  - name: "Notepad"
+    path: "notepad.exe"
+    arguments: ""
+    type: "Command"
+    order: 2
+  - name: "Calculator"
+    path: "calc.exe"
+    arguments: ""
+    type: "Command"
+    order: 3
+  - name: "Explorer"
+    path: "explorer.exe"
+    arguments: ""
+    type: "Command"
+    order: 4
+
+# Паттерны для фильтрации служебных файлов
+serviceFilePrefixes:
+  - "unins"
+  - "update"
+  - "crash"
+  - "helper"
+  - "install"
+  - "setup"

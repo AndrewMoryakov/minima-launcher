@@ -1,0 +1,24 @@
+# Build and debug
+bin/
+obj/
+*.exe
+*.dll
+*.pdb
+
+# IDE
+.vs/
+.vscode/
+.idea/
+*.csproj.user
+*.suo
+
+# Documentation (will be added separately)
+*.md
+
+# Temp files
+nul
+.claude/
+
+# OS
+.DS_Store
+Thumbs.db

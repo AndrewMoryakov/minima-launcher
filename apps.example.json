@@ -1,0 +1,92 @@
+[
+  {
+    "Id": "00000000-0000-0000-0000-000000000001",
+    "Name": "Chrome",
+    "Path": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+    "Arguments": "",
+    "WorkingDirectory": "",
+    "Order": 0,
+    "Type": "Standard"
+  },
+  {
+    "Id": "00000000-0000-0000-0000-000000000002",
+    "Name": "Visual Studio Code",
+    "Path": "C:\\Users\\%USERNAME%\\AppData\\Local\\Programs\\Microsoft VS Code\\Code.exe",
+    "Arguments": "",
+    "WorkingDirectory": "",
+    "Order": 1,
+    "Type": "Standard"
+  },
+  {
+    "Id": "00000000-0000-0000-0000-000000000003",
+    "Name": "Gmail",
+    "Path": "https://mail.google.com",
+    "Arguments": "",
+    "WorkingDirectory": "",
+    "Order": 2,
+    "Type": "Url"
+  },
+  {
+    "Id": "00000000-0000-0000-0000-000000000004",
+    "Name": "Calculator",
+    "Path": "shell:AppsFolder\\Microsoft.WindowsCalculator_8wekyb3d8bbwe!App",
+    "Arguments": "",
+    "WorkingDirectory": "",
+    "Order": 3,
+    "Type": "UWP"
+  },
+  {
+    "Id": "00000000-0000-0000-0000-000000000005",
+    "Name": "IP Config",
+    "Path": "ipconfig /all",
+    "Arguments": "",
+    "WorkingDirectory": "",
+    "Order": 4,
+    "Type": "Command"
+  },
+  {
+    "Id": "00000000-0000-0000-0000-000000000006",
+    "Name": "Notepad",
+    "Path": "notepad.exe",
+    "Arguments": "",
+    "WorkingDirectory": "",
+    "Order": 5,
+    "Type": "Standard"
+  },
+  {
+    "Id": "00000000-0000-0000-0000-000000000007",
+    "Name": "File Explorer",
+    "Path": "explorer.exe",
+    "Arguments": "C:\\",
+    "WorkingDirectory": "",
+    "Order": 6,
+    "Type": "Standard"
+  },
+  {
+    "Id": "00000000-0000-0000-0000-000000000008",
+    "Name": "Command Prompt",
+    "Path": "cmd.exe",
+    "Arguments": "",
+    "WorkingDirectory": "C:\\",
+    "Order": 7,
+    "Type": "Standard"
+  },
+  {
+    "Id": "00000000-0000-0000-0000-000000000009",
+    "Name": "GitHub",
+    "Path": "https://github.com",
+    "Arguments": "",
+    "WorkingDirectory": "",
+    "Order": 8,
+    "Type": "Url"
+  },
+  {
+    "Id": "00000000-0000-0000-0000-000000000010",
+    "Name": "Settings",
+    "Path": "ms-settings:",
+    "Arguments": "",
+    "WorkingDirectory": "",
+    "Order": 9,
+    "Type": "Standard"
+  }
+]
